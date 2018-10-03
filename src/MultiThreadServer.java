@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,6 +15,7 @@ import java.util.concurrent.Executors;
 public class MultiThreadServer {
 
     static ExecutorService executeIt = Executors.newFixedThreadPool(10);
+    static List<Socket> clients = new ArrayList<>();
 
     /**
      * @param args
@@ -22,7 +25,7 @@ public class MultiThreadServer {
         // стартуем сервер на порту 3345 и инициализируем переменную для обработки консольных команд с самого сервера
         try (ServerSocket server = new ServerSocket(3345);
              BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Server socket created, command console reader for listen to server commands");
+//            System.out.println("Server socket created, command console reader for listen to server commands");
 
             // стартуем цикл при условии что серверный сокет не закрыт
             while (!server.isClosed()) {
@@ -30,7 +33,7 @@ public class MultiThreadServer {
                 // проверяем поступившие комманды из консоли сервера если такие
                 // были
                 if (br.ready()) {
-                    System.out.println("Main Server found any messages in channel, let's look at them.");
+//                    System.out.println("Main Server found any messages in channel, let's look at them.");
 
                     // если команда - quit то инициализируем закрытие сервера и
                     // выход из цикла раздачии нитей монопоточных серверов
@@ -46,6 +49,7 @@ public class MultiThreadServer {
                 // подключения к сокету общения под именем - "clientDialog" на
                 // серверной стороне
                 Socket client = server.accept();
+                clients.add(client);
 
                 // после получения запроса на подключение сервер создаёт сокет
                 // для общения с клиентом и отправляет его в отдельную нить
@@ -53,7 +57,7 @@ public class MultiThreadServer {
                 // монопоточную нить = сервер - MonoThreadClientHandler и тот
                 // продолжает общение от лица сервера
                 executeIt.execute(new MonoThreadClientHandler(client));
-                System.out.print("Connection accepted.");
+//                System.out.print("Connection accepted.");
             }
 
             // закрытие пула нитей после завершения работы всех нитей

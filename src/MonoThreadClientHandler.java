@@ -2,13 +2,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MonoThreadClientHandler implements Runnable {
 
     private static Socket clientDialog;
+    private static List<Socket> clients = new ArrayList<>();
+
 
     public MonoThreadClientHandler(Socket client) {
         MonoThreadClientHandler.clientDialog = client;
+        clients.add(client);
     }
 
     @Override
@@ -22,9 +27,9 @@ public class MonoThreadClientHandler implements Runnable {
 
 // канал чтения из сокета
             DataInputStream in = new DataInputStream(clientDialog.getInputStream());
-            System.out.println("DataInputStream created");
+//            System.out.println("DataInputStream created");
 
-            System.out.println("DataOutputStream  created");
+//            System.out.println("DataOutputStream  created");
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // основная рабочая часть //
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,14 +37,14 @@ public class MonoThreadClientHandler implements Runnable {
             // начинаем диалог с подключенным клиентом в цикле, пока сокет не
             // закрыт клиентом
             while (!clientDialog.isClosed()) {
-                System.out.println("Server reading from channel");
+//                System.out.println("Server reading from channel");
 
                 // серверная нить ждёт в канале чтения (inputstream) получения
                 // данных клиента после получения данных считывает их
                 String entry = in.readUTF();
 
                 // и выводит в консоль
-                System.out.println("READ from clientDialog message - " + entry);
+                System.out.println(entry);
 
                 // инициализация проверки условия продолжения работы с клиентом
                 // по этому сокету по кодовому слову - quit в любом регистре
@@ -47,8 +52,8 @@ public class MonoThreadClientHandler implements Runnable {
 
                     // если кодовое слово получено то инициализируется закрытие
                     // серверной нити
-                    System.out.println("Client initialize connections suicide ...");
-                    out.writeUTF("Server reply - " + entry + " - OK");
+//                    System.out.println("Client initialize connections suicide ...");
+//                    out.writeUTF("Server reply - " + entry + " - OK");
                     Thread.sleep(3000);
                     break;
                 }
@@ -56,12 +61,16 @@ public class MonoThreadClientHandler implements Runnable {
                 // если условие окончания работы не верно - продолжаем работу -
                 // отправляем эхо обратно клиенту
 
-                System.out.println("Server try writing to channel");
-                out.writeUTF("Server reply - " + entry + " - OK");
-                System.out.println("Server Wrote message to clientDialog.");
+                for(Socket socket : clients) {
+                    out = new DataOutputStream(socket.getOutputStream());
+                    System.out.println("Server try writing to channel");
+                    out.writeUTF("Server reply - " + entry + " - OK\n");
+                    System.out.println("Server Wrote message to clientDialog.");
+                    out.flush();
+                }
 
                 // освобождаем буфер сетевых сообщений
-                out.flush();
+
 
                 // возвращаемся в началло для считывания нового сообщения
             }
