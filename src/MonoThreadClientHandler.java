@@ -1,6 +1,4 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +21,11 @@ public class MonoThreadClientHandler implements Runnable {
             // инициируем каналы общения в сокете, для сервера
 
             // канал записи в сокет следует инициализировать сначала канал чтения для избежания блокировки выполнения программы на ожидании заголовка в сокете
-            DataOutputStream out = new DataOutputStream(clientDialog.getOutputStream());
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(clientDialog.getOutputStream()));
 
 // канал чтения из сокета
-            DataInputStream in = new DataInputStream(clientDialog.getInputStream());
+//            DataInputStream in = new DataInputStream(clientDialog.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientDialog.getInputStream()));
 //            System.out.println("DataInputStream created");
 
 //            System.out.println("DataOutputStream  created");
@@ -41,7 +40,7 @@ public class MonoThreadClientHandler implements Runnable {
 
                 // серверная нить ждёт в канале чтения (inputstream) получения
                 // данных клиента после получения данных считывает их
-                String entry = in.readUTF();
+                String entry = in.readLine();
 
                 // и выводит в консоль
                 System.out.println(entry);
@@ -61,11 +60,11 @@ public class MonoThreadClientHandler implements Runnable {
                 // если условие окончания работы не верно - продолжаем работу -
                 // отправляем эхо обратно клиенту
 
-                for(Socket socket : clients) {
-                    out = new DataOutputStream(socket.getOutputStream());
-                    System.out.println("Server try writing to channel");
-                    out.writeUTF("Server reply - " + entry + " - OK\n");
-                    System.out.println("Server Wrote message to clientDialog.");
+                for (Socket socket : clients) {
+                    out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//                    System.out.println("Server try writing to channel");
+                    out.write(entry + "\n");
+//                    System.out.println("Server Wrote message to clientDialog.");
                     out.flush();
                 }
 
