@@ -64,6 +64,7 @@ public class MonoThreadClientHandler implements Runnable {
                     out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 //                    System.out.println("Server try writing to channel");
                     out.write(entry + "\n");
+//                    out.newLine();
 //                    System.out.println("Server Wrote message to clientDialog.");
                     out.flush();
                 }
