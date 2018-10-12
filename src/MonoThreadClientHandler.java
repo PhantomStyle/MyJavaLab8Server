@@ -47,14 +47,20 @@ public class MonoThreadClientHandler implements Runnable {
 
                 // инициализация проверки условия продолжения работы с клиентом
                 // по этому сокету по кодовому слову - quit в любом регистре
-                if (entry.equalsIgnoreCase("quit")) {
+                if (entry.startsWith("$$")) {
 
                     // если кодовое слово получено то инициализируется закрытие
                     // серверной нити
 //                    System.out.println("Client initialize connections suicide ...");
 //                    out.writeUTF("Server reply - " + entry + " - OK");
-                    Thread.sleep(3000);
-                    break;
+                    for (Socket socket : clients) {
+                        out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//                    System.out.println("Server try writing to channel");
+                        out.write(entry + "\n");
+//                    out.newLine();
+//                    System.out.println("Server Wrote message to clientDialog.");
+                        out.flush();
+                    }
                 }
 
                 // если условие окончания работы не верно - продолжаем работу -
@@ -92,9 +98,6 @@ public class MonoThreadClientHandler implements Runnable {
 
             System.out.println("Closing connections & channels - DONE.");
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
